@@ -27,14 +27,14 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 
 ## Scripts by Site🌐
 
-### [ChatGPT](./chatgpt/)
+### [ChatGPT](./chatgpt)
 Enhance ChatGPT experience:
 - **[Custom UI Themes](./chatgpt/themes/ChatGPT_GPT-5_Announcement_Background_(Hue-Shift-Edition)-1.3.user.js)**: Custom themes and color schemes
 
 ## How to Use🚀
 
 ### Prerequisites
-1. Install a userscript manager:
+1. Install the userscript manager:
     - [Tampermonkey](https://www.tampermonkey.net/) (Chrome, Firefox, Edge, Safari)
     - [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) (Firefox)
     - [Violentmonkey](https://violentmonkey.github.io/) (Chrome, Firefox)
