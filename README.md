@@ -1,10 +1,10 @@
 # 🤖 AI-Generated Scripts Collection
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub contributors](https://img.shields.io/github/contributors/yourusername/your-repo.svg)](https://github.com/yourusername/your-repo/graphs/contributors)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/your-repo.svg)](https://github.com/yourusername/your-repo/issues)
+[![GitHub contributors](https://img.shields.io/github/contributors/imwaitingnow/AI-Generated-Scripts.svg)](https://github.com/imwaitingnow/AI-Generated-Scripts/graphs/contributors)
+[![GitHub issues](https://img.shields.io/github/issues/imwaitingnow/AI-Generated-Scripts.svg)](https://github.com/imwaitingnow/AI-Generated-Scripts/issues)
 
-A curated collection of useful scripts generated with AI assistance to enhance and automate your web browsing experience.
+Curated AI-generated scripts to enhance and automate web browsing.
 
 ## 📋 Table of Contents
 - [About](#about)
@@ -14,27 +14,24 @@ A curated collection of useful scripts generated with AI assistance to enhance a
 - [License](#license)
 - [Disclaimer](#disclaimer)
 
-## 🌟 About
+## About🌟
 
-This repository serves as a centralized location for scripts created with the help of AI tools. These scripts are designed to improve, customize, or automate functionality across various websites and platforms. All scripts are provided under the MIT license, meaning you're free to use, modify, and distribute them as you see fit.
+Centralized repository for AI-assisted scripts to improve, customize, or automate website functionality. Licensed under MIT for free use, modification, and distribution.
 
-### What you'll find here:
-- Userscripts for Tampermonkey, Greasemonkey, and Violentmonkey
-- Browser extensions and add-ons
-- Automation scripts for various platforms
-- Custom CSS and styling enhancements
-- Utility scripts for web development
+### What's Included:
+- Userscripts for Tampermonkey, Greasemonkey, Violentmonkey
+- Browser extensions/add-ons
+- Automation scripts
+- Custom CSS/styling
+- Web development utilities
 
-## 🌐 Scripts by Site
+## Scripts by Site🌐
 
 ### [ChatGPT](./chatgpt/)
-Scripts for enhancing the ChatGPT experience.
-- **[GPT-5 Announcement Background](./chatgpt/gpt5-background.user.js)** - Restores the colorful moving background from GPT-5 announcement
-- **[Chat History Exporter](./chatgpt/chat-exporter.user.js)** - Export your ChatGPT conversations in various formats
-- **[Custom UI Themes](./chatgpt/themes/ChatGPT GPT-5 Announcement Background (Hue Shift Edition)-1.3.user.js)** - Collection of custom themes and color schemes
+Enhance ChatGPT experience:
+- **[Custom UI Themes](./chatgpt/themes/ChatGPT_GPT-5_Announcement_Background_(Hue-Shift-Edition)-1.3.user.js)**: Custom themes and color schemes
 
-
-## 🚀 How to Use
+## How to Use🚀
 
 ### Prerequisites
 1. Install a userscript manager:
@@ -43,66 +40,61 @@ Scripts for enhancing the ChatGPT experience.
     - [Violentmonkey](https://violentmonkey.github.io/) (Chrome, Firefox)
 
 ### Installation
-1. Browse to the script you want in the [Scripts by Site](#scripts-by-site) section
-2. Click on the script file (`.user.js`)
-3. Your userscript manager should automatically detect and offer to install the script
-4. Click "Install" and refresh the target website
+1. Navigate to desired script in [Scripts by Site](#scripts-by-site)
+2. Click `.user.js` file
+3. Userscript manager should prompt to install
+4. Click "Install" and refresh target website
 
 ### Manual Installation
-If automatic installation doesn't work:
-1. Copy the entire script code
-2. Open your userscript manager
+1. Copy script code
+2. Open userscript manager
 3. Click "Create new script"
-4. Paste the code and save
+4. Paste code and save
 
-## 🤝 Contributing
+## Contributing🤝
 
-We welcome contributions! If you have an AI-generated script that others might find useful:
-
-1. **Fork the repository**
-2. **Create a new branch** (`git checkout -b feature/amazing-script`)
-3. **Add your script** to the appropriate site folder
-4. **Update the README** to include your script in the [Scripts by Site](#scripts-by-site) section
-5. **Commit your changes** (`git commit -am 'Add amazing script'`)
-6. **Push to the branch** (`git push origin feature/amazing-script`)
-7. **Create a Pull Request**
+Contributions welcome! To add an AI-generated script:
+1. Fork repository
+2. Create branch (`git checkout -b feature/amazing-script`)
+3. Add script to appropriate site folder
+4. Update README with script in [Scripts by Site](#scripts-by-site)
+5. Commit (`git commit -am 'Add amazing script'`)
+6. Push (`git push origin feature/amazing-script`)
+7. Create Pull Request
 
 ### Script Guidelines
-- Include clear comments explaining what the script does
-- Follow the existing folder structure (organize by site)
-- Add a license header to each script
-- Test your script before submitting
+- Include clear comments
+- Follow folder structure (organize by site)
+- Add license header
+- Test before submitting
 
-## 📄 License
+## License📄
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
+- ✅ Use for any purpose
+- ✅ Modify freely
+- ✅ Use in commercial projects
+- ✅ Redistribute
+- 📝 Keep original copyright notice
 
-### What this means:
-- ✅ You can use these scripts for any purpose
-- ✅ You can modify them however you want
-- ✅ You can use them in commercial projects
-- ✅ You can redistribute them
-- 📝 Just keep the original copyright notice
+## Disclaimer⚠️
 
-## ⚠️ Disclaimer
+Scripts provided "as is" without warranty:
+- Use at own risk
+- May break with website updates
+- Review scripts before installation
+- Respect website terms of service
+- Maintainers not liable for issues
 
-These scripts are provided "as is" without warranty of any kind. While they are generated with AI assistance and tested to the best of our ability:
+## Support📞
 
-- Use at your own risk
-- Some scripts may break when websites update their code
-- Always review scripts before installing them
-- Be aware of the terms of service for the websites you're modifying
-- The maintainers are not responsible for any issues that arise from using these scripts
-
-## 📞 Support
-
-If you encounter issues with any script:
-1. Check if there's already an [open issue](https://github.com/yourusername/your-repo/issues)
-2. If not, create a new issue with:
-    - The script name
-    - A description of the problem
-    - Steps to reproduce the issue
-    - Your browser and userscript manager versions
+For issues:
+1. Check [open issues](https://github.com/imwaitingnow/AI-Generated-Scripts/issues)
+2. Create new issue with:
+    - Script name
+    - Problem description
+    - Steps to reproduce
+    - Browser/userscript manager versions
 
 ---
 
