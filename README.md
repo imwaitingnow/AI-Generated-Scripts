@@ -29,7 +29,7 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 
 ### [ChatGPT](./chatgpt)
 Enhance ChatGPT experience:
-- **[Custom UI Themes](./chatgpt/themes/ChatGPT_GPT-5_Announcement_Background_(Hue-Shift-Edition)-1.3.user.js)**: Custom themes and color schemes
+- **[Custom UI Themes](./chatgpt/themes)**: Custom themes and color schemes
 
 ## How to Use🚀
 
