@@ -30,6 +30,7 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 ### [ChatGPT](./chatgpt)
 Enhance ChatGPT experience:
 - **[Custom UI Themes](./chatgpt/themes)**: Custom themes and color schemes
+- **[User experience](./User-Experience)**
 
 ## How to Use🚀
 
