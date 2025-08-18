@@ -3,7 +3,7 @@ name: Auto-Generate Scripts by Site Section
 on:
   push:
     paths:
-      - 'sites/**'   # only watch the staging folder
+      - 'sites/**'
     branches:
       - main
 
@@ -15,6 +15,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Normalize filenames (remove spaces)
+        run: |
+          find sites -type f -name "*.user.js" | while read f; do
+            if [[ "$f" =~ [[:space:]] ]]; then
+              new=$(echo "$f" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+              echo "Renaming $f -> $new"
+              mkdir -p "$(dirname "$new")"
+              git mv "$f" "$new"
+            fi
+          done
+
       - name: Build Scripts by Site section
         run: |
           section_file=$(mktemp)
@@ -22,31 +33,33 @@ jobs:
           echo "## Scripts by Site🌐" > "$section_file"
           echo "" >> "$section_file"
 
-          # Loop over site folders
           for site in sites/*/ ; do
             site_name=$(basename "$site")
             echo "### [${site_name}](./sites/$site_name)" >> "$section_file"
 
-            # Find subfolders and .user.js scripts
             find "$site" -type d -o -name "*.user.js" | sort | while read path; do
               rel=${path#./}
-              depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 )) # adjust depth so site=0
+              depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 ))
               indent=$(printf '  %.0s' $(seq 1 $depth))
 
               if [ -d "$path" ]; then
                 name=$(basename "$path")
-                [[ "$name" == "$(basename "$site")" ]] && continue # skip top site dir
+                [[ "$name" == "$(basename "$site")" ]] && continue
                 echo "${indent}- **[${name}](./$rel)**" >> "$section_file"
 
               elif [[ "$path" == *.user.js ]]; then
                 name=$(basename "$path")
 
-                # Try to extract description from script header
+                # Grab @name and @description
+                display_name=$(grep -m1 "^// @name" "$path" | sed 's|// @name[[:space:]]*||')
                 desc=$(grep -m1 "^// @description" "$path" | sed 's|// @description[[:space:]]*||')
+
+                [[ -z "$display_name" ]] && display_name="$name"
+
                 if [ -n "$desc" ]; then
-                  echo "${indent}- [${name}](./$rel) — ${desc}" >> "$section_file"
+                  echo "${indent}- [${display_name}](./$rel) — ${desc}" >> "$section_file"
                 else
-                  echo "${indent}- [${name}](./$rel)" >> "$section_file"
+                  echo "${indent}- [${display_name}](./$rel)" >> "$section_file"
                 fi
               fi
             done
@@ -54,7 +67,6 @@ jobs:
             echo "" >> "$section_file"
           done
 
-          # Replace the section in README.md
           awk '
             BEGIN{in_section=0}
             /^## Scripts by Site🌐/{print;system("cat '"$section_file"'");in_section=1;next}
@@ -69,9 +81,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           if git diff --quiet; then
-            echo "No README changes."
+            echo "No changes to commit."
           else
-            git add README.md
-            git commit -m "chore: auto-update Scripts by Site section with descriptions"
+            git add -A
+            git commit -m "chore: normalize filenames + update README"
             git push
           fi
