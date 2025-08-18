@@ -15,11 +15,24 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Normalize filenames (remove spaces)
+      # Normalize folder names (lowercase, no spaces)
+      - name: Normalize directories
+        run: |
+          find sites -depth -type d | while read d; do
+            new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+            if [[ "$d" != "$new" ]]; then
+              echo "Renaming dir $d -> $new"
+              mkdir -p "$(dirname "$new")"
+              git mv "$d" "$new"
+            fi
+          done
+
+      # Normalize filenames (lowercase, no spaces)
+      - name: Normalize filenames
         run: |
           find sites -type f -name "*.user.js" | while read f; do
-            if [[ "$f" =~ [[:space:]] ]]; then
-              new=$(echo "$f" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+            new=$(echo "$f" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+            if [[ "$f" != "$new" ]]; then
               echo "Renaming $f -> $new"
               mkdir -p "$(dirname "$new")"
               git mv "$f" "$new"
@@ -35,7 +48,7 @@ jobs:
 
           for site in sites/*/ ; do
             site_name=$(basename "$site")
-            echo "### [${site_name}](./sites/$site_name)" >> "$section_file"
+            echo "### [${site_name^}](./sites/$site_name)" >> "$section_file"
 
             find "$site" -type d -o -name "*.user.js" | sort | while read path; do
               rel=${path#./}
@@ -50,7 +63,7 @@ jobs:
               elif [[ "$path" == *.user.js ]]; then
                 name=$(basename "$path")
 
-                # Grab @name and @description
+                # Get @name and @description from header
                 display_name=$(grep -m1 "^// @name" "$path" | sed 's|// @name[[:space:]]*||')
                 desc=$(grep -m1 "^// @description" "$path" | sed 's|// @description[[:space:]]*||')
 
@@ -67,9 +80,10 @@ jobs:
             echo "" >> "$section_file"
           done
 
+          # Replace the old section (fixed: no duplicate headings!)
           awk '
             BEGIN{in_section=0}
-            /^## Scripts by Site🌐/{print;system("cat '"$section_file"'");in_section=1;next}
+            /^## Scripts by Site🌐/{system("cat '"$section_file"'");in_section=1;next}
             /^## / && in_section{in_section=0}
             !in_section
           ' README.md > README.new
@@ -84,6 +98,6 @@ jobs:
             echo "No changes to commit."
           else
             git add -A
-            git commit -m "chore: normalize filenames + update README"
+            git commit -m "chore: normalize paths + update Scripts by Site section"
             git push
           fi

@@ -27,7 +27,6 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 
 
 ## Scripts by Site🌐
-## Scripts by Site🌐
 
 ### [chat.z.ai](./sites/chat.z.ai)
   - **[User-Experience](./sites/chat.z.ai/User-Experience)**
