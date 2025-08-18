@@ -25,7 +25,7 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 - Custom CSS/styling
 - Web development utilities
 
-## Scripts by Site🌐
+
 ## Scripts by Site🌐
 
 ### [chatgpt](./sites/chatgpt)
