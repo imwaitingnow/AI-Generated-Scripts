@@ -1,0 +1,77 @@
+name: Auto-Generate Scripts by Site Section
+
+on:
+  push:
+    paths:
+      - 'sites/**'   # only watch the staging folder
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build Scripts by Site section
+        run: |
+          section_file=$(mktemp)
+
+          echo "## Scripts by Site🌐" > "$section_file"
+          echo "" >> "$section_file"
+
+          # Loop over site folders
+          for site in sites/*/ ; do
+            site_name=$(basename "$site")
+            echo "### [${site_name}](./sites/$site_name)" >> "$section_file"
+
+            # Find subfolders and .user.js scripts
+            find "$site" -type d -o -name "*.user.js" | sort | while read path; do
+              rel=${path#./}
+              depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 )) # adjust depth so site=0
+              indent=$(printf '  %.0s' $(seq 1 $depth))
+
+              if [ -d "$path" ]; then
+                name=$(basename "$path")
+                [[ "$name" == "$(basename "$site")" ]] && continue # skip top site dir
+                echo "${indent}- **[${name}](./$rel)**" >> "$section_file"
+
+              elif [[ "$path" == *.user.js ]]; then
+                name=$(basename "$path")
+
+                # Try to extract description from script header
+                desc=$(grep -m1 "^// @description" "$path" | sed 's|// @description[[:space:]]*||')
+                if [ -n "$desc" ]; then
+                  echo "${indent}- [${name}](./$rel) — ${desc}" >> "$section_file"
+                else
+                  echo "${indent}- [${name}](./$rel)" >> "$section_file"
+                fi
+              fi
+            done
+
+            echo "" >> "$section_file"
+          done
+
+          # Replace the section in README.md
+          awk '
+            BEGIN{in_section=0}
+            /^## Scripts by Site🌐/{print;system("cat '"$section_file"'");in_section=1;next}
+            /^## / && in_section{in_section=0}
+            !in_section
+          ' README.md > README.new
+
+          mv README.new README.md
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No README changes."
+          else
+            git add README.md
+            git commit -m "chore: auto-update Scripts by Site section with descriptions"
+            git push
+          fi
