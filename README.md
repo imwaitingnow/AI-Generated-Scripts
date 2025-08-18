@@ -28,19 +28,6 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 
 ## Scripts by Site🌐
 
-### [chat.z.ai](./sites/chat.z.ai)
-  - **[User-Experience](./sites/chat.z.ai/User-Experience)**
-  - **[user-experience](./sites/chat.z.ai/user-experience)**
-    - [Chat.z.ai Auto-Refresh Fix](./sites/chat.z.ai/user-experience/chat.z.ai-auto-refresh-fix-1.0.user.js) — Forces chat.z.ai to repaint so the chat updates without switching tabs
-
-### [chatgpt](./sites/chatgpt)
-  - **[User-Experience](./sites/chatgpt/User-Experience)**
-  - **[themes](./sites/chatgpt/themes)**
-    - [ChatGPT GPT-5 Announcement Background (Hue Shift Edition)](./sites/chatgpt/themes/ChatGPT_GPT-5_Announcement_Background_(Hue-Shift-Edition)-1.3.user.js) — Restores colorful moving GPT-5 style background on ChatGPT with smooth color cycling
-    - [ChatGPT GPT-5 Background (Optimized v1.6)](./sites/chatgpt/themes/ChatGPT_GPT-5_Background_(Optimized-v1.6)-1.6.user.js) — Optimized GPT-5 style background: hue-synced, faster drawing, placed inside app container to avoid being covered by opaque layers.
-  - **[user-experience](./sites/chatgpt/user-experience)**
-    - [Multi-Platform AI Prompt Manager](./sites/chatgpt/user-experience/multi-platform-ai-prompt-manager-2.3.user.js) — Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, and better insertion
-
 ## How to Use🚀
 
 ### Prerequisites
