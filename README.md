@@ -4,7 +4,6 @@
   - [Multi-Platform AI Prompt Manager](./sites/ai-chatbots/multi-platform-ai-prompt-manager-2.5.user.js) — Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, better insertion, and enhanced UX
 
 ### [All-sites](./sites/all-sites)
-  - [Customizable Dark Mode with Darker Themes and Exclusions](./sites/all-sites/customizable-dark-mode-with-darker-themes-and-exclusions-4.6.user.js) — Applies customizable dark mode or very dark color themes to different websites. Users can exclude specific sites from theming and manage exclusions via the Tampermonkey settings page.
   - [Dreamy Blobs — Dark-Mode Background (with Live Settings)](./sites/all-sites/dreamy-blobs-—-dark-mode-background-(with-live-settings)-1.0.0.user.js) — Turn any page into a dreamy, animated dark-mode canvas with floating blobs. Live settings via Tampermonkey menu. Presets, Random Magic, Reset, and persistence.
   - [Smart Image Text Selector (OCR Region)](./sites/all-sites/smart-image-text-selector-(ocr-region)-1.0.user.js) — Draw a box on an image to extract text from that area using OCR (Tesseract.js)
 
@@ -19,14 +18,6 @@
   - **[user-experience](./sites/chatgpt/user-experience)**
     - [ChatGPT Auto-Scroll During Generation (Container Fixed)](./sites/chatgpt/user-experience/chatgpt-auto-scroll-during-generation-(container-fixed)-4.0.user.js) — Automatically smooth scroll during ChatGPT content generation - Fixed container detection
 
-
-# 🤖 AI-Generated Scripts Collection
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub contributors](https://img.shields.io/github/contributors/imwaitingnow/AI-Generated-Scripts.svg)](https://github.com/imwaitingnow/AI-Generated-Scripts/graphs/contributors)
-[![GitHub issues](https://img.shields.io/github/issues/imwaitingnow/AI-Generated-Scripts.svg)](https://github.com/imwaitingnow/AI-Generated-Scripts/issues)
-
-Curated AI-generated scripts to enhance and automate web browsing.
 
 ## 📋 Table of Contents
 - [About](#about)
