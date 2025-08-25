@@ -18,8 +18,13 @@ jobs:
       # Normalize all directories (deepest-first to avoid parent rename issues)
       - name: Normalize directories
         run: |
-          # Use deepest-first order so children are renamed before parents
+          # Use deepest-first order to rename children before parents
           find sites -depth -type d | while read d; do
+            # Skip if directory is empty
+            if [ -z "$(ls -A "$d")" ]; then
+              echo "Skipping empty directory: $d"
+              continue
+            fi
             new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
             if [[ "$d" != "$new" && -d "$d" ]]; then
               echo "Renaming dir $d -> $new"
