@@ -53,20 +53,22 @@ jobs:
           echo "## Scripts by Site🌐" > "$section_file"
           echo "" >> "$section_file"
 
-          # Use sort -u to avoid duplicate directories
-          for site in $(find sites -mindepth 1 -maxdepth 1 -type d | sort | while read d; do
-            basename "$(echo "$d" | tr '[:upper:]' '[:lower:]')"
-          done | sort -u); do
-            # Find the actual directory with matching basename (case-insensitive)
-            site_dir=$(find sites -mindepth 1 -maxdepth 1 -type d -iname "$site" | head -n 1)
-            if [ -z "$site_dir" ]; then
-              echo "Skipping non-existent directory: $site"
+          # Log directories being processed
+          echo "Processing directories:"
+          find sites -mindepth 1 -maxdepth 1 -type d | sort
+
+          # Process directories, normalizing to avoid duplicates
+          for site in $(find sites -mindepth 1 -maxdepth 1 -type d | sort); do
+            site_name=$(basename "$site")
+            echo "Processing site: $site_name"
+            # Skip if directory is empty or doesn't exist
+            if [ ! -d "$site" ] || [ -z "$(ls -A "$site")" ]; then
+              echo "Skipping empty or non-existent directory: $site"
               continue
             fi
-            site_name=$(basename "$site_dir")
             echo "### [${site_name^}](./sites/$site_name)" >> "$section_file"
 
-            find "$site_dir" \( -type d -o -name "*.user.js" \) | sort | while read path; do
+            find "$site" \( -type d -o -name "*.user.js" \) | sort | while read path; do
               rel=${path#./}
               depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 ))
               indent=$(printf '  %.0s' $(seq 1 $depth))
@@ -89,14 +91,29 @@ jobs:
             echo "" >> "$section_file"
           done
 
-          # Replace old section robustly to avoid duplicates
-          awk '
-            BEGIN {in_section=0; print_section=1}
-            /^## Scripts by Site🌐/ {in_section=1; print_section=0; next}
-            /^## / && in_section {in_section=0; print_section=1}
-            print_section {print}
-            END {if (in_section) system("cat '"$section_file"'")}
-          ' README.md > README.new
+          # Log the generated section for debugging
+          echo "Generated section content:"
+          cat "$section_file"
+
+          # Replace or append the Scripts by Site section
+          if grep -q "^## Scripts by Site🌐" README.md; then
+            # Replace existing section
+            awk '
+              BEGIN {in_section=0}
+              /^## Scripts by Site🌐/ {in_section=1; print; system("cat '"$section_file"' | tail -n +2"); next}
+              /^## / && in_section {in_section=0}
+              !in_section {print}
+            ' README.md > README.new
+          else
+            # Append section if it doesn't exist
+            cp README.md README.new
+            echo "" >> README.new
+            cat "$section_file" >> README.new
+          fi
+
+          # Log the new README for debugging
+          echo "New README content:"
+          cat README.new
           mv README.new README.md
 
       # Commit changes if any
