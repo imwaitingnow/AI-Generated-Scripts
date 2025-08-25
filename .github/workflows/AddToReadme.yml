@@ -12,46 +12,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-        # Normalize folder names (lowercase, no spaces), shallowest first
+      # Normalize directories (deepest first: fixes parent/child rename issue)
       - name: Normalize directories
         run: |
-          # List dirs by depth (shortest paths first), so parents are renamed before children
-          find sites -type d | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | while read d; do
+          # Rename deepest dirs first to avoid moving parents before children
+          find sites -depth -type d | while read d; do
             new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-            if [[ "$d" != "$new" ]]; then
+            if [[ "$d" != "$new" && -d "$d" ]]; then
               echo "Renaming dir $d -> $new"
               mkdir -p "$(dirname "$new")"
               git mv "$d" "$new"
             fi
           done
 
-      # Normalize filenames (lowercase, no spaces)
+      # Normalize filenames (lowercase, replace spaces)
       - name: Normalize filenames
         run: |
           find sites -type f -name "*.user.js" | while read f; do
             new=$(echo "$f" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-            if [[ "$f" != "$new" ]]; then
-              echo "Renaming $f -> $new"
+            if [[ "$f" != "$new" && -f "$f" ]]; then
+              echo "Renaming file $f -> $new"
               mkdir -p "$(dirname "$new")"
               git mv "$f" "$new"
             fi
           done
 
+      # Build the Scripts by Site section
       - name: Build Scripts by Site section
         run: |
           section_file=$(mktemp)
-
           echo "## Scripts by Site🌐" > "$section_file"
           echo "" >> "$section_file"
 
+          # Loop through each top-level site folder
           for site in sites/*/ ; do
             site_name=$(basename "$site")
             echo "### [${site_name^}](./sites/$site_name)" >> "$section_file"
 
-            find "$site" -type d -o -name "*.user.js" | sort | while read path; do
+            # List all folders and scripts under the site
+            find "$site" \( -type d -o -name "*.user.js" \) | sort | while read path; do
               rel=${path#./}
               depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 ))
               indent=$(printf '  %.0s' $(seq 1 $depth))
@@ -64,7 +66,7 @@ jobs:
               elif [[ "$path" == *.user.js ]]; then
                 name=$(basename "$path")
 
-                # Get @name and @description from header
+                # Extract @name and @description from script header if available
                 display_name=$(grep -m1 "^// @name" "$path" | sed 's|// @name[[:space:]]*||')
                 desc=$(grep -m1 "^// @description" "$path" | sed 's|// @description[[:space:]]*||')
 
@@ -81,10 +83,10 @@ jobs:
             echo "" >> "$section_file"
           done
 
-          # Replace the old section (fixed: no duplicate headings!)
+          # Replace old section with new one (avoids duplicate headings)
           awk '
             BEGIN{in_section=0}
-            /^## Scripts by Site🌐/{system("cat '"$section_file"'");in_section=1;next}
+            /^## Scripts by Site🌐/{print;system("cat '"$section_file"' | tail -n +2");in_section=1;next}
             /^## / && in_section{in_section=0}
             !in_section
           ' README.md > README.new
@@ -99,6 +101,6 @@ jobs:
             echo "No changes to commit."
           else
             git add -A
-            git commit -m "chore: normalize paths + update Scripts by Site section"
+            git commit -m "chore: normalize paths and update Scripts by Site section"
             git push
           fi
