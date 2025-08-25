@@ -15,18 +15,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Normalize only top-level site folders (Git auto-moves children)
-      - name: Normalize top-level directories
+      # Normalize all directories (deepest-first to avoid parent rename issues)
+      - name: Normalize directories
         run: |
-          for d in sites/*/; do
-            new=$(echo "$d" | sed 's|/$||' | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-            if [[ "$d" != "$new/" && -d "$d" ]]; then
-              echo "Renaming dir $d -> $new/"
+          # Use deepest-first order so children are renamed before parents
+          find sites -depth -type d | while read d; do
+            new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+            if [[ "$d" != "$new" && -d "$d" ]]; then
+              echo "Renaming dir $d -> $new"
+              mkdir -p "$(dirname "$new")"
               git mv "$d" "$new"
             fi
           done
 
-      # Normalize filenames (lowercase, replace spaces)
+      # Normalize filenames (spaces and uppercase -> lowercase)
       - name: Normalize filenames
         run: |
           find sites -type f -name "*.user.js" | while read f; do
@@ -38,16 +40,17 @@ jobs:
             fi
           done
 
-      # Build the Scripts by Site section in README
+      # Build the Scripts by Site section dynamically
       - name: Build Scripts by Site section
         run: |
           section_file=$(mktemp)
           echo "## Scripts by Site🌐" > "$section_file"
           echo "" >> "$section_file"
 
-          for site in sites/*/; do
+          for site in $(find sites -mindepth 1 -maxdepth 1 -type d | sort); do
             site_name=$(basename "$site")
             echo "### [${site_name^}](./sites/$site_name)" >> "$section_file"
+          
             find "$site" \( -type d -o -name "*.user.js" \) | sort | while read path; do
               rel=${path#./}
               depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 ))
@@ -71,7 +74,7 @@ jobs:
             echo "" >> "$section_file"
           done
 
-          # Replace old section safely
+          # Replace old section safely to avoid duplicates
           awk '
             BEGIN{in_section=0}
             /^## Scripts by Site🌐/{print;system("cat '"$section_file"' | tail -n +2");in_section=1;next}
@@ -80,6 +83,7 @@ jobs:
           ' README.md > README.new
           mv README.new README.md
 
+      # Commit changes if any
       - name: Commit changes
         run: |
           git config --global user.name "github-actions[bot]"
