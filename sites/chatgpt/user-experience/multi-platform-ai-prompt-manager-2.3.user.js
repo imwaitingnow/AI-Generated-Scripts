@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Multi-Platform AI Prompt Manager
 // @namespace    http://tampermonkey.net/
-// @version      2.5
-// @description  Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, better insertion, and enhanced UX
+// @version      2.3
+// @description  Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, and better insertion
 // @author       skyline/imwaitingnow
 // @match        https://chatgpt.com/*
 // @match        https://chat.openai.com/*
@@ -15,8 +15,6 @@
 // @match        https://tongyi.aliyun.com/*
 // @match        https://grok.com/*
 // @match        https://gemini.google.com/*
-// @match        https://chat.z.ai/*
-// @match        https://www.kimi.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
@@ -26,7 +24,7 @@
 (function() {
     'use strict';
 
-    let PLATFORM_CONFIG = {
+    const PLATFORM_CONFIG = {
         chatgpt: {
             name: 'ChatGPT',
             domains: ['chatgpt.com', 'chat.openai.com'],
@@ -146,62 +144,8 @@
                 shadow: 'rgba(66, 133, 244, 0.15)'
             },
             icon: '✨'
-        },
-        zai: {
-            name: 'Z.AI',
-            domains: ['chat.z.ai'],
-            storageKey: 'zai_saved_prompts',
-            theme: {
-                primary: '#10a37f',
-                primaryDark: '#0e8c6a',
-                secondary: '#f7f7f8',
-                surface: '#ffffff',
-                surfaceSecondary: '#f7f7f8',
-                text: '#353740',
-                textSecondary: '#8e8ea0',
-                border: '#e5e5e5',
-                borderMedium: '#d1d5db',
-                shadow: 'rgba(0,0,0,0.1)'
-            },
-            darkTheme: {
-                primary: '#10a37f',
-                primaryDark: '#0e8c6a',
-                secondary: '#202123',
-                surface: '#343541',
-                surfaceSecondary: '#40414f',
-                text: '#ececf1',
-                textSecondary: '#a3a3a3',
-                border: '#4d4d4f',
-                borderMedium: '#5e5e60',
-                shadow: 'rgba(0,0,0,0.1)'
-            },
-            icon: '🤖'
         }
     };
-
-    // Dynamically add platforms for any @match patterns not covered by known configurations
-    const GMInfo = GM_info || GM.info;
-    if (GMInfo) {
-        const matches = GMInfo.script.matches || [];
-        const knownDomains = new Set(Object.values(PLATFORM_CONFIG).flatMap(c => c.domains));
-        const newDomains = new Set(matches.map(match => {
-            let domain = match.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-            return domain;
-        }).filter(domain => domain && !knownDomains.has(domain)));
-
-        newDomains.forEach(domain => {
-            const cleanDomain = domain.replace(/^www\./, '');
-            const key = domain.replace(/\./g, '_');
-            PLATFORM_CONFIG[key] = {
-                name: cleanDomain.split('.')[0].charAt(0).toUpperCase() + cleanDomain.split('.')[0].slice(1),
-                domains: [domain],
-                storageKey: `${key}_saved_prompts`,
-                theme: { ...PLATFORM_CONFIG.chatgpt.theme },
-                darkTheme: { ...PLATFORM_CONFIG.chatgpt.darkTheme },
-                icon: '🤖'
-            };
-        });
-    }
 
     let currentPlatform = null;
     let activePlatformTab = null;
@@ -223,19 +167,7 @@
                 return key;
             }
         }
-        let cleanHostname = hostname.replace(/^www\./, '');
-        const fallbackKey = hostname.replace(/\./g, '_');
-        if (!PLATFORM_CONFIG[fallbackKey]) {
-            PLATFORM_CONFIG[fallbackKey] = {
-                name: cleanHostname.split('.')[0].charAt(0).toUpperCase() + cleanHostname.split('.')[0].slice(1),
-                domains: [hostname],
-                storageKey: `${fallbackKey}_saved_prompts`,
-                theme: { ...PLATFORM_CONFIG.chatgpt.theme },
-                darkTheme: { ...PLATFORM_CONFIG.chatgpt.darkTheme },
-                icon: '🤖'
-            };
-        }
-        return fallbackKey;
+        return 'chatgpt';
     }
 
     function findChatGPTInput() {
@@ -433,38 +365,6 @@
         return null;
     }
 
-    function findZAIInput() {
-        const selectors = [
-            'textarea[placeholder*="Message"]',
-            'div[contenteditable="true"]',
-            '.chat-input textarea',
-            '[role="textbox"]'
-        ];
-
-        for (const selector of selectors) {
-            const element = document.querySelector(selector);
-            if (element && isElementVisible(element)) {
-                return element;
-            }
-        }
-
-        const textareas = document.querySelectorAll('textarea');
-        for (const textarea of textareas) {
-            if (isElementVisible(textarea) && textarea.offsetHeight > 30) {
-                return textarea;
-            }
-        }
-
-        const editables = document.querySelectorAll('[contenteditable="true"]');
-        for (const editable of editables) {
-            if (isElementVisible(editable) && editable.offsetHeight > 30) {
-                return editable;
-            }
-        }
-
-        return null;
-    }
-
     function isElementVisible(element) {
         if (!element) return false;
         const rect = element.getBoundingClientRect();
@@ -501,9 +401,6 @@
                 break;
             case 'gemini':
                 input = findGeminiInput();
-                break;
-            case 'zai':
-                input = findZAIInput();
                 break;
             default:
                 input = findChatGPTInput();
@@ -637,8 +534,8 @@
                 const setValue = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
                 setValue.call(textInput, lastInsertedPrompt);
                 const inputEvent = new Event('input', { bubbles: true });
-            textInput.dispatchEvent(inputEvent);
-            textInput.dispatchEvent(new Event('change', { bubbles: true }));
+                textInput.dispatchEvent(inputEvent);
+                textInput.dispatchEvent(new Event('change', { bubbles: true }));
             } else if (textInput.contentEditable === 'true') {
                 textInput.textContent = lastInsertedPrompt;
                 const inputEvent = new InputEvent('input', { bubbles: true, cancelable: true, inputType: 'insertText', data: lastInsertedPrompt });
@@ -697,14 +594,13 @@
             :root {
                 --primary: ${theme.primary};
                 --primary-dark: ${theme.primaryDark};
-                --secondary: ${theme.secondary};
-                --surface: ${theme.surface};
-                --surfaceSecondary: ${theme.surfaceSecondary};
-                --text: ${theme.text};
-                --textSecondary: ${theme.textSecondary};
-                --border: ${theme.border};
-                --borderMedium: ${theme.borderMedium};
-                --shadow: ${theme.shadow};
+                --surface-primary: ${theme.surface};
+                --surface-secondary: ${theme.secondary};
+                --text-primary: ${theme.text};
+                --text-secondary: ${theme.textSecondary};
+                --border-light: ${theme.border};
+                --border-medium: ${theme.borderMedium};
+                --shadow-color: ${theme.shadow};
             }
 
             #prompt-manager-toggle {
@@ -713,8 +609,8 @@
                 right: 10px !important;
                 transform: translateY(-50%) !important;
                 z-index: 2147483647 !important;
-                background: var(--surface) !important;
-                border: 1px solid var(--border) !important;
+                background: var(--surface-primary) !important;
+                border: 1px solid var(--border-light) !important;
                 border-radius: 8px !important;
                 width: 40px !important;
                 height: 40px !important;
@@ -722,7 +618,7 @@
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                box-shadow: 0 2px 8px var(--shadow) !important;
+                box-shadow: 0 2px 8px var(--shadow-color) !important;
                 transition: all 0.2s ease !important;
                 visibility: visible !important;
                 opacity: 1 !important;
@@ -730,8 +626,8 @@
             }
 
             #prompt-manager-toggle:hover {
-                background: var(--surfaceSecondary) !important;
-                box-shadow: 0 4px 12px var(--shadow) !important;
+                background: var(--surface-secondary) !important;
+                box-shadow: 0 4px 12px var(--shadow-color) !important;
             }
 
             .hamburger {
@@ -745,7 +641,7 @@
                 position: absolute !important;
                 height: 2px !important;
                 width: 100% !important;
-                background: var(--text) !important;
+                background: var(--text-primary) !important;
                 border-radius: 1px !important;
                 opacity: 1 !important;
                 left: 0 !important;
@@ -763,9 +659,9 @@
                 right: -380px !important;
                 width: 380px !important;
                 height: 100vh !important;
-                background: var(--surface) !important;
-                border-left: 1px solid var(--border) !important;
-                box-shadow: -2px 0 15px var(--shadow) !important;
+                background: var(--surface-primary) !important;
+                border-left: 1px solid var(--border-light) !important;
+                box-shadow: -2px 0 15px var(--shadow-color) !important;
                 z-index: 2147483646 !important;
                 transition: right 0.3s ease !important;
                 display: flex !important;
@@ -782,19 +678,16 @@
 
             .toolbar-header {
                 padding: 16px;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--border-light);
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                background: var(--surfaceSecondary);
-                position: sticky;
-                top: 0;
-                z-index: 10;
+                background: var(--surface-secondary);
             }
 
             .toolbar-title {
                 font-weight: 600;
-                color: var(--text);
+                color: var(--text-primary);
                 font-size: 14px;
                 display: flex;
                 align-items: center;
@@ -812,80 +705,58 @@
 
             .toolbar-btn {
                 background: transparent;
-                border: 1px solid var(--border);
+                border: 1px solid var(--border-light);
                 border-radius: 6px;
                 padding: 6px 8px;
                 cursor: pointer;
-                color: var(--text);
+                color: var(--text-primary);
                 font-size: 12px;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
             }
 
             .toolbar-btn:hover {
-                background: var(--surfaceSecondary);
-                transform: scale(1.05);
+                background: var(--surface-secondary);
             }
 
             .platform-tabs {
                 display: flex;
-                background: var(--surfaceSecondary);
-                border-bottom: 1px solid var(--border);
+                background: var(--surface-secondary);
+                border-bottom: 1px solid var(--border-light);
                 overflow-x: auto;
-                scrollbar-width: thin;
-                scrollbar-color: var(--borderMedium) var(--surfaceSecondary);
-                padding: 4px 0;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
 
             .platform-tabs::-webkit-scrollbar {
-                height: 6px;
-            }
-
-            .platform-tabs::-webkit-scrollbar-track {
-                background: var(--surfaceSecondary);
-            }
-
-            .platform-tabs::-webkit-scrollbar-thumb {
-                background: var(--borderMedium);
-                border-radius: 3px;
-            }
-
-            .platform-tabs::-webkit-scrollbar-thumb:hover {
-                background: var(--textSecondary);
+                display: none;
             }
 
             .platform-tab {
-                flex: 0 0 auto;
-                min-width: 50px;
-                padding: 10px 6px;
+                flex: 1;
+                min-width: 60px;
+                padding: 8px 4px;
                 text-align: center;
                 cursor: pointer;
                 border: none;
                 background: transparent;
-                color: var(--textSecondary);
+                color: var(--text-secondary);
                 font-size: 11px;
                 transition: all 0.2s ease;
                 white-space: nowrap;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 4px;
-                margin: 0 2px;
+                gap: 2px;
             }
 
             .platform-tab:hover {
-                background: var(--surface);
-                color: var(--text);
-                box-shadow: 0 2px 4px var(--shadow);
+                background: var(--surface-primary);
+                color: var(--text-primary);
             }
 
             .platform-tab.active {
                 background: var(--primary);
                 color: white;
-            }
-
-            .platform-tab:focus {
-                outline: 2px solid var(--primary);
-                outline-offset: 2px;
             }
 
             .platform-tab-icon {
@@ -901,25 +772,24 @@
                 flex: 1;
                 overflow-y: auto;
                 padding: 16px;
-                scroll-behavior: smooth;
             }
 
             .prompt-item {
                 margin-bottom: 12px;
-                border: 1px solid var(--border);
+                border: 1px solid var(--border-light);
                 border-radius: 8px;
-                background: var(--surface);
+                background: var(--surface-primary);
                 transition: all 0.2s ease;
             }
 
             .prompt-item:hover {
-                border-color: var(--borderMedium);
-                box-shadow: 0 2px 4px var(--shadow);
+                border-color: var(--border-medium);
+                box-shadow: 0 2px 4px var(--shadow-color);
             }
 
             .prompt-header {
                 padding: 12px;
-                border-bottom: 1px solid var(--border);
+                border-bottom: 1px solid var(--border-light);
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
@@ -927,30 +797,12 @@
 
             .prompt-name {
                 font-weight: 500;
-                color: var(--text);
+                color: var(--text-primary);
                 font-size: 13px;
                 max-width: 180px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
-                position: relative;
-            }
-
-            .prompt-name:hover::after {
-                content: attr(title);
-                position: absolute;
-                background: var(--surfaceSecondary);
-                color: var(--text);
-                padding: 4px 8px;
-                border-radius: 4px;
-                border: 1px solid var(--border);
-                z-index: 100;
-                top: -30px;
-                left: 50%;
-                transform: translateX(-50%);
-                white-space: normal;
-                max-width: 300px;
-                font-size: 12px;
             }
 
             .prompt-actions {
@@ -964,15 +816,14 @@
                 padding: 4px 6px;
                 border-radius: 4px;
                 cursor: pointer;
-                color: var(--textSecondary);
+                color: var(--text-secondary);
                 font-size: 11px;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
             }
 
             .action-btn:hover {
-                background: var(--surfaceSecondary);
-                color: var(--text);
-                transform: scale(1.05);
+                background: var(--surface-secondary);
+                color: var(--text-primary);
             }
 
             .action-btn.danger:hover {
@@ -987,7 +838,7 @@
 
             .prompt-preview {
                 padding: 12px;
-                color: var(--textSecondary);
+                color: var(--text-secondary);
                 font-size: 12px;
                 line-height: 1.4;
                 max-height: 60px;
@@ -996,13 +847,13 @@
             }
 
             .prompt-preview:hover {
-                color: var(--text);
+                color: var(--text-primary);
             }
 
             .add-prompt-form {
                 padding: 16px;
-                border-top: 1px solid var(--border);
-                background: var(--surfaceSecondary);
+                border-top: 1px solid var(--border-light);
+                background: var(--surface-secondary);
             }
 
             .form-group {
@@ -1012,7 +863,7 @@
             .form-label {
                 display: block;
                 margin-bottom: 4px;
-                color: var(--text);
+                color: var(--text-primary);
                 font-size: 12px;
                 font-weight: 500;
             }
@@ -1020,10 +871,10 @@
             .form-input, .form-textarea {
                 width: 100%;
                 padding: 8px 12px;
-                border: 1px solid var(--border);
+                border: 1px solid var(--border-light);
                 border-radius: 6px;
-                background: var(--surface);
-                color: var(--text);
+                background: var(--surface-primary);
+                color: var(--text-primary);
                 font-size: 13px;
                 resize: vertical;
                 box-sizing: border-box;
@@ -1055,28 +906,26 @@
                 cursor: pointer;
                 font-size: 11px;
                 font-weight: 500;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
             }
 
             .btn-primary:hover {
                 background: var(--primary-dark);
-                transform: scale(1.05);
             }
 
             .btn-secondary {
                 background: transparent;
-                color: var(--text);
-                border: 1px solid var(--border);
+                color: var(--text-primary);
+                border: 1px solid var(--border-light);
                 padding: 8px 12px;
                 border-radius: 6px;
                 cursor: pointer;
                 font-size: 11px;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
             }
 
             .btn-secondary:hover {
-                background: var(--surface);
-                transform: scale(1.05);
+                background: var(--surface-primary);
             }
 
             .clone-modal {
@@ -1093,7 +942,7 @@
             }
 
             .clone-modal-content {
-                background: var(--surface);
+                background: var(--surface-primary);
                 border-radius: 8px;
                 padding: 20px;
                 max-width: 400px;
@@ -1103,7 +952,7 @@
 
             .clone-modal h3 {
                 margin: 0 0 16px 0;
-                color: var(--text);
+                color: var(--text-primary);
                 font-size: 16px;
             }
 
@@ -1116,11 +965,11 @@
 
             .platform-option {
                 padding: 12px;
-                border: 1px solid var(--border);
+                border: 1px solid var(--border-light);
                 border-radius: 6px;
                 cursor: pointer;
                 text-align: center;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -1129,8 +978,7 @@
 
             .platform-option:hover {
                 border-color: var(--primary);
-                background: var(--surfaceSecondary);
-                transform: scale(1.05);
+                background: var(--surface-secondary);
             }
 
             .platform-option.selected {
@@ -1160,7 +1008,7 @@
                 box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3) !important;
                 opacity: 0 !important;
                 transform: translateY(20px) !important;
-                transition: all 0.3s ease, transform 0.1s ease !important;
+                transition: all 0.3s ease !important;
                 z-index: 2147483645 !important;
             }
 
@@ -1197,19 +1045,18 @@
             .minimized-btn {
                 width: 40px;
                 height: 40px;
-                border: 1px solid var(--border);
+                border: 1px solid var(--border-light);
                 border-radius: 6px;
-                background: var(--surface);
+                background: var(--surface-primary);
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.2s ease, transform 0.1s ease;
+                transition: all 0.2s ease;
             }
 
             .minimized-btn:hover {
-                background: var(--surfaceSecondary);
-                transform: scale(1.05);
+                background: var(--surface-secondary);
             }
 
             .prompt-list::-webkit-scrollbar {
@@ -1217,16 +1064,16 @@
             }
 
             .prompt-list::-webkit-scrollbar-track {
-                background: var(--surfaceSecondary);
+                background: var(--surface-secondary);
             }
 
             .prompt-list::-webkit-scrollbar-thumb {
-                background: var(--borderMedium);
+                background: var(--border-medium);
                 border-radius: 3px;
             }
 
             .prompt-list::-webkit-scrollbar-thumb:hover {
-                background: var(--textSecondary);
+                background: var(--text-secondary);
             }
 
             .sync-status {
@@ -1237,66 +1084,6 @@
                 height: 8px;
                 border-radius: 50%;
                 background: #10b981;
-            }
-
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                padding: 12px 32px 12px 16px;
-                border-radius: 6px;
-                font-size: 13px;
-                z-index: 2147483647;
-                opacity: 0;
-                transform: translateY(-20px);
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .notification.error {
-                background: #ef4444;
-            }
-
-            .notification.visible {
-                opacity: 1;
-                transform: translateY(0);
-            }
-
-            .notification-close {
-                background: none;
-                border: none;
-                color: white;
-                font-size: 12px;
-                cursor: pointer;
-                padding: 4px;
-                line-height: 1;
-                transition: all 0.2s ease;
-            }
-
-            .notification-close:hover {
-                transform: scale(1.1);
-            }
-
-            .empty-state-btn {
-                margin-top: 12px;
-                background: var(--primary);
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 12px;
-                font-weight: 500;
-                transition: all 0.2s ease, transform 0.1s ease;
-            }
-
-            .empty-state-btn:hover {
-                background: var(--primary-dark);
-                transform: scale(1.05);
             }
 
             @keyframes fadeInUp {
@@ -1369,17 +1156,10 @@
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'platform-tabs';
 
-        let entries = Object.entries(PLATFORM_CONFIG);
-        const currentKey = currentPlatform;
-        const currentEntry = entries.find(([k]) => k === currentKey);
-        const otherEntries = entries.filter(([k]) => k !== currentKey);
-        const sortedEntries = currentEntry ? [currentEntry, ...otherEntries] : entries;
-
-        sortedEntries.forEach(([key, config]) => {
+        Object.entries(PLATFORM_CONFIG).forEach(([key, config]) => {
             const tab = document.createElement('button');
             tab.className = 'platform-tab';
             tab.dataset.platform = key;
-            tab.tabIndex = 0;
 
             if (key === (activePlatformTab || currentPlatform)) {
                 tab.classList.add('active');
@@ -1391,29 +1171,10 @@
             `;
 
             tab.addEventListener('click', () => switchPlatformTab(key));
-            tab.addEventListener('keydown', (e) => handleTabKeyNavigation(e, key));
-
             tabsContainer.appendChild(tab);
         });
 
         return tabsContainer;
-    }
-
-    function handleTabKeyNavigation(event, platformKey) {
-        const tabs = Array.from(document.querySelectorAll('.platform-tab'));
-        const currentIndex = tabs.findIndex(tab => tab.dataset.platform === platformKey);
-
-        if (event.key === 'ArrowRight') {
-            const nextIndex = (currentIndex + 1) % tabs.length;
-            tabs[nextIndex].focus();
-            switchPlatformTab(tabs[nextIndex].dataset.platform);
-        } else if (event.key === 'ArrowLeft') {
-            const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-            tabs[prevIndex].focus();
-            switchPlatformTab(tabs[prevIndex].dataset.platform);
-        } else if (event.key === 'Enter') {
-            switchPlatformTab(platformKey);
-        }
     }
 
     function switchPlatformTab(platform) {
@@ -1595,40 +1356,39 @@
     }
 
     function showNotification(message, type = 'success') {
-        const existingNotifications = document.querySelectorAll('.notification');
-        existingNotifications.forEach(n => n.remove());
-
         const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <span>${message}</span>
-            <button class="notification-close">×</button>
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            z-index: 2147483647;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
         `;
+        notification.textContent = message;
 
         document.body.appendChild(notification);
 
         setTimeout(() => {
-            notification.classList.add('visible');
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateY(0)';
         }, 100);
 
-        const closeBtn = notification.querySelector('.notification-close');
-        closeBtn.addEventListener('click', () => {
-            notification.classList.remove('visible');
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
-        });
-
         setTimeout(() => {
-            notification.classList.remove('visible');
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(-20px)';
             setTimeout(() => {
                 if (document.body.contains(notification)) {
                     document.body.removeChild(notification);
                 }
             }, 300);
-        }, 5000);
+        }, 3000);
     }
 
     function toggleToolbar() {
@@ -1668,7 +1428,7 @@
             emptyState.style.cssText = `
                 text-align: center;
                 padding: 40px 20px;
-                color: var(--textSecondary);
+                color: var(--text-secondary);
                 font-size: 13px;
             `;
 
@@ -1684,14 +1444,8 @@
                         `Switch to other platform tabs to view their prompts!<br/>You can use prompts from any platform on ${PLATFORM_CONFIG[currentPlatform].name}.`
                     }
                 </div>
-                ${isCurrentPlatform ? '<button class="empty-state-btn" id="empty-state-add">Add Prompt</button>' : ''}
             `;
             list.appendChild(emptyState);
-
-            const addBtn = emptyState.querySelector('#empty-state-add');
-            if (addBtn) {
-                addBtn.addEventListener('click', showAddForm);
-            }
             return;
         }
 
@@ -1863,7 +1617,7 @@
 
         setTimeout(() => {
             const syncData = {
-                version: '2.5',
+                version: '2.3',
                 timestamp: new Date().toISOString(),
                 platforms: allPlatformPrompts,
                 metadata: {
@@ -1936,7 +1690,7 @@
         }
 
         const exportData = {
-            version: '2.5',
+            version: '2.3',
             timestamp: new Date().toISOString(),
             currentPlatform: currentPlatform,
             activePlatformTab: activePlatformTab,
@@ -2041,4 +1795,5 @@
     }
 
     init();
+
 })();
