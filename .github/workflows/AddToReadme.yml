@@ -15,15 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Normalize directories (deepest first: fixes parent/child rename issue)
-      - name: Normalize directories
+      # Normalize only top-level site folders (Git auto-moves children)
+      - name: Normalize top-level directories
         run: |
-          # Rename deepest dirs first to avoid moving parents before children
-          find sites -depth -type d | while read d; do
-            new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
-            if [[ "$d" != "$new" && -d "$d" ]]; then
-              echo "Renaming dir $d -> $new"
-              mkdir -p "$(dirname "$new")"
+          for d in sites/*/; do
+            new=$(echo "$d" | sed 's|/$||' | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+            if [[ "$d" != "$new/" && -d "$d" ]]; then
+              echo "Renaming dir $d -> $new/"
               git mv "$d" "$new"
             fi
           done
@@ -40,38 +38,29 @@ jobs:
             fi
           done
 
-      # Build the Scripts by Site section
+      # Build the Scripts by Site section in README
       - name: Build Scripts by Site section
         run: |
           section_file=$(mktemp)
           echo "## Scripts by Site🌐" > "$section_file"
           echo "" >> "$section_file"
 
-          # Loop through each top-level site folder
-          for site in sites/*/ ; do
+          for site in sites/*/; do
             site_name=$(basename "$site")
             echo "### [${site_name^}](./sites/$site_name)" >> "$section_file"
-
-            # List all folders and scripts under the site
             find "$site" \( -type d -o -name "*.user.js" \) | sort | while read path; do
               rel=${path#./}
               depth=$(( $(echo "$rel" | grep -o "/" | wc -l) - 1 ))
               indent=$(printf '  %.0s' $(seq 1 $depth))
-
               if [ -d "$path" ]; then
                 name=$(basename "$path")
                 [[ "$name" == "$(basename "$site")" ]] && continue
                 echo "${indent}- **[${name}](./$rel)**" >> "$section_file"
-
               elif [[ "$path" == *.user.js ]]; then
                 name=$(basename "$path")
-
-                # Extract @name and @description from script header if available
                 display_name=$(grep -m1 "^// @name" "$path" | sed 's|// @name[[:space:]]*||')
                 desc=$(grep -m1 "^// @description" "$path" | sed 's|// @description[[:space:]]*||')
-
                 [[ -z "$display_name" ]] && display_name="$name"
-
                 if [ -n "$desc" ]; then
                   echo "${indent}- [${display_name}](./$rel) — ${desc}" >> "$section_file"
                 else
@@ -79,18 +68,16 @@ jobs:
                 fi
               fi
             done
-
             echo "" >> "$section_file"
           done
 
-          # Replace old section with new one (avoids duplicate headings)
+          # Replace old section safely
           awk '
             BEGIN{in_section=0}
             /^## Scripts by Site🌐/{print;system("cat '"$section_file"' | tail -n +2");in_section=1;next}
             /^## / && in_section{in_section=0}
             !in_section
           ' README.md > README.new
-
           mv README.new README.md
 
       - name: Commit changes
