@@ -15,10 +15,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # Normalize folder names (lowercase, no spaces)
+        # Normalize folder names (lowercase, no spaces), shallowest first
       - name: Normalize directories
         run: |
-          find sites -depth -type d | while read d; do
+          # List dirs by depth (shortest paths first), so parents are renamed before children
+          find sites -type d | awk '{ print length, $0 }' | sort -n | cut -d" " -f2- | while read d; do
             new=$(echo "$d" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
             if [[ "$d" != "$new" ]]; then
               echo "Renaming dir $d -> $new"
