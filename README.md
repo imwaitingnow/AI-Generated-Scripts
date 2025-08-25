@@ -28,17 +28,17 @@ Centralized repository for AI-assisted scripts to improve, customize, or automat
 
 ## Scripts by Site🌐
 
-### [Chat.z.ai](./sites/chat.z.ai)
-  - **[user-experience](./sites/chat.z.ai/user-experience)**
-    - [Chat.z.ai Auto-Refresh Fix](./sites/chat.z.ai/user-experience/chat.z.ai-auto-refresh-fix-1.0.user.js) — Forces chat.z.ai to repaint so the chat updates without switching tabs
+### [Chat.z.ai](sites/Chat.z.ai)
+  - **[user-experience](sites/Chat.z.ai/user-experience)**
+    - [Chat.z.ai Auto-Refresh Fix](sites/Chat.z.ai/user-experience/chat.z.ai-auto-refresh-fix-1.0.user.js) — Forces chat.z.ai to repaint so the chat updates without switching tabs
 
-### [Chatgpt](./sites/chatgpt)
-  - **[themes](./sites/chatgpt/themes)**
-    - [ChatGPT GPT-5 Announcement Background (Hue Shift Edition)](./sites/chatgpt/themes/chatgpt_gpt-5_announcement_background_(hue-shift-edition)-1.3.user.js) — Restores colorful moving GPT-5 style background on ChatGPT with smooth color cycling
-    - [ChatGPT GPT-5 Background (Optimized v1.6)](./sites/chatgpt/themes/chatgpt_gpt-5_background_(optimized-v1.6)-1.6.user.js) — Optimized GPT-5 style background: hue-synced, faster drawing, placed inside app container to avoid being covered by opaque layers.
-  - **[user-experience](./sites/chatgpt/user-experience)**
-    - [ChatGPT Auto-Scroll During Generation (Container Fixed)](./sites/chatgpt/user-experience/chatgpt-auto-scroll-during-generation-(container-fixed)-4.0.user.js) — Automatically smooth scroll during ChatGPT content generation - Fixed container detection
-    - [Multi-Platform AI Prompt Manager](./sites/chatgpt/user-experience/multi-platform-ai-prompt-manager-2.3.user.js) — Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, and better insertion
+### [Chatgpt](sites/Chatgpt)
+  - **[themes](sites/Chatgpt/themes)**
+    - [ChatGPT GPT-5 Announcement Background (Hue Shift Edition)](sites/Chatgpt/themes/chatgpt_gpt-5_announcement_background_(hue-shift-edition)-1.3.user.js) — Restores colorful moving GPT-5 style background on ChatGPT with smooth color cycling
+    - [ChatGPT GPT-5 Background (Optimized v1.6)](sites/Chatgpt/themes/chatgpt_gpt-5_background_(optimized-v1.6)-1.6.user.js) — Optimized GPT-5 style background: hue-synced, faster drawing, placed inside app container to avoid being covered by opaque layers.
+  - **[user-experience](sites/Chatgpt/user-experience)**
+    - [ChatGPT Auto-Scroll During Generation (Container Fixed)](sites/Chatgpt/user-experience/chatgpt-auto-scroll-during-generation-(container-fixed)-4.0.user.js) — Automatically smooth scroll during ChatGPT content generation - Fixed container detection
+    - [Multi-Platform AI Prompt Manager](sites/Chatgpt/user-experience/multi-platform-ai-prompt-manager-2.3.user.js) — Save, manage and insert prompts across multiple AI chatbot platforms with improved input detection, fixed visibility, dark mode support, and better insertion
 
 ## How to Use🚀
 
