@@ -95,21 +95,21 @@ jobs:
           echo "Generated section content:"
           cat "$section_file"
 
-          # Replace or append the Scripts by Site section
-          if grep -q "^## Scripts by Site🌐" README.md; then
-            # Replace existing section
-            awk '
-              BEGIN {in_section=0}
-              /^## Scripts by Site🌐/ {in_section=1; print; system("cat '"$section_file"' | tail -n +2"); next}
-              /^## / && in_section {in_section=0}
-              !in_section {print}
-            ' README.md > README.new
-          else
-            # Append section if it doesn't exist
-            cp README.md README.new
-            echo "" >> README.new
-            cat "$section_file" >> README.new
-          fi
+          # Create new README with Scripts by Site at the top
+          temp_file=$(mktemp)
+          # Remove old Scripts by Site section from README, if it exists
+          awk '
+            BEGIN {in_section=0}
+            /^## Scripts by Site🌐/ {in_section=1; next}
+            /^## / && in_section {in_section=0}
+            !in_section {print}
+          ' README.md > "$temp_file"
+          # Combine new section with filtered README
+          {
+            cat "$section_file"
+            echo ""
+            cat "$temp_file"
+          } > README.new
 
           # Log the new README for debugging
           echo "New README content:"
